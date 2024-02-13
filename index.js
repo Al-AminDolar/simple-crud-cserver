@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
   res.send("Simple crud server running");
 });
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri =
   "mongodb+srv://simple-crud:mymrO7STGQUgzEul@cluster0.dijqngy.mongodb.net/?retryWrites=true&w=majority";
 
@@ -30,9 +30,26 @@ async function run() {
     await client.connect();
     const database = client.db("userDb");
     const userCollection = await database.collection("users");
+
+    app.get("/users", async (req, res) => {
+      const cursor = userCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     app.post("/users", async (req, res) => {
       const user = req.body;
       const result = await userCollection.insertOne(user);
+      res.send(result);
+    });
+
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("please delete from database", id);
+      const query = {
+        _id: new ObjectId(id),
+      };
+      const result = await userCollection.deleteOne(query);
       res.send(result);
     });
 
